@@ -1,7 +1,9 @@
-#ifndef EFFECT_H
-#define EFFECT_H
+#ifndef EF_BOUNCE_H
+#define EF_BOUNCE_H
 
-class Effect
+#include effect.h
+
+class Bounce : public Effect
 {
 public:
   Effect();
@@ -11,6 +13,6 @@ public:
 
 private:
   int _pos;
-}
+} Bounce;
 
 #endif

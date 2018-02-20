@@ -4,11 +4,9 @@
 #define NUM_LEDS 210
 #define LINE 70
 
-// For led chips like Neopixels, which have a data line, ground, and power, you just
-// need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
-// ground, and power), like the LPD8806, define both DATA_PIN and CLOCK_PIN
+// Use CLOCK_PIN for apa102 type of LED strips
 #define DATA_PIN 7
-#define CLOCK_PIN 13
+//#define CLOCK_PIN 13
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -21,7 +19,7 @@ CRGB leds[NUM_LEDS];
 const uint8_t brightnessCount = 5;
 uint8_t brightnessMap[brightnessCount] = { 16, 32, 64, 128, 255 };
 uint8_t briLevel = 2;
-
+uint8_t position = 0;
 
 struct Leds {
   int o;
@@ -52,28 +50,47 @@ static uint8_t hue = 0;
 void loop() {
   // First slide the led in one direction
   CheckButtons();
-  EVERY_N_MILLISECONDS(10) {
-    for (int i = 0; i < LINE; i++) {
-      // Set the i'th led, and show it
-      SetPixel(i, CHSV(hue++, 255, 255));
-      // Show the leds
-      FastLED.show();
-      // now that we've shown the leds, reset the i'th led to black
-      // leds[i] = CRGB::Black;
-      fadeall();
-      // Wait a little bit before we loop around and do it again
-      CheckButtons();
+  // Bounce();
+  Flash();
+  FastLED.show();
+}
+bool direction = true;
+
+int timeToFlash = 2000;
+int lastFlash;
+int now = millis();
+
+void Flash()
+{
+  now = millis();
+  if (now - timeToFlash > lastFlash)
+  {
+    Blink();
+    lastFlash = millis();
+  }
+}
+
+void Bounce()
+{
+  fadeall();
+  SetPixel(position, CHSV(hue++, 255, 255));
+  // if direction == true, we are going up
+  if (direction == true)
+  {
+    if (position == LINE - 1)
+    {
+      direction = false;
+      position--;
+    } else {
+      position++;
     }
-    // Now go in the other direction.
-    for (int i = (LINE) - 1; i >= 0; i--) {
-      // Set the i'th led, and show it
-      SetPixel(i, CHSV(hue++, 255, 255));
-      // Show the leds
-      FastLED.show();
-      // now that we've shown the leds, reset the i'th led to black
-      // leds[i] = CRGB::Black;
-      fadeall();
-      CheckButtons();
+  } else {
+    if (position == 0)
+    {
+      direction = true;
+      position++;
+    } else {
+      position--;
     }
   }
 }
@@ -82,7 +99,7 @@ int millisBtwnPushes = 100;
 int lastPush = 0;
 int lastUpState = HIGH;
 int lastDwState = HIGH;
-int now = millis();
+// int now = millis();
 int upState;
 int dwState;
 
@@ -102,7 +119,6 @@ void CheckButtons()
       }
       else
       {
-        Serial.println("blink!");
         Blink();
       }
     }
@@ -123,7 +139,6 @@ void CheckButtons()
       }
       else
       {
-        Serial.println("blink!");
         Blink();
       }
     }
@@ -137,6 +152,9 @@ void CheckButtons()
   LEDS.setBrightness(brightnessMap[briLevel]);
 }
 
+int lastBlink = 0;
+int timeToBlink = 50;
+
 void Blink()
 {
   for (int j = 0; j < 2; j++)
@@ -144,16 +162,14 @@ void Blink()
     for (int i = 0; i < LINE; i++)
     {
       SetPixel(i, CHSV(96, 255, 255));
-      delay(0);
     }
     FastLED.show();
-    delay(10);
+    delay(40);
     for (int i = 0; i < LINE; i++)
     {
       SetPixel(i, CHSV(0, 0, 0));
-      delay(0);
     }
-    delay(10);
+    delay(40);
     FastLED.show();
   }
 }
