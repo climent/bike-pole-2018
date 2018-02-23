@@ -164,12 +164,12 @@ void Blink()
       SetPixel(i, CHSV(96, 255, 255));
     }
     FastLED.show();
-    delay(40);
+    delay(10);
     for (int i = 0; i < LINE; i++)
     {
       SetPixel(i, CHSV(0, 0, 0));
     }
-    delay(40);
+    delay(50);
     FastLED.show();
   }
 }
